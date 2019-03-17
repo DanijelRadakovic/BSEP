@@ -4,7 +4,6 @@ import megatravel.com.pki.domain.Server;
 import megatravel.com.pki.domain.enums.ServerType;
 
 import java.io.Serializable;
-import java.net.URL;
 
 public class ServerDTO implements Serializable {
 
@@ -12,23 +11,27 @@ public class ServerDTO implements Serializable {
 
     private Long id;
 
-    private URL address;
+    private String name;
 
-    private ServerType serverType;
+    private String address;
+
+    private ServerType type;
 
     public ServerDTO() {
     }
 
-    public ServerDTO(Long id, URL address, ServerType serverType) {
+    public ServerDTO(Long id, String name, String address, ServerType type) {
         this.id = id;
+        this.name = name;
         this.address = address;
-        this.serverType = serverType;
+        this.type = type;
     }
 
     public ServerDTO(Server server) {
         this.id = server.getId();
+        this.name = server.getName();
         this.address = server.getAddress();
-        this.serverType = server.getType();
+        this.type = server.getType();
     }
 
     public static long getSerialVersionUID() {
@@ -43,19 +46,27 @@ public class ServerDTO implements Serializable {
         this.id = id;
     }
 
-    public URL getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(URL address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
-    public ServerType getServerType() {
-        return serverType;
+    public ServerType getType() {
+        return type;
     }
 
-    public void setServerType(ServerType serverType) {
-        this.serverType = serverType;
+    public void setType(ServerType type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

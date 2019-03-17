@@ -5,7 +5,6 @@ import megatravel.com.pki.domain.enums.ServerType;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.net.URL;
 
 @Entity
 public class Server implements Serializable {
@@ -16,8 +15,11 @@ public class Server implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String name;
+
     @Column(nullable = false)
-    private URL address;
+    private String address;
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
@@ -26,16 +28,18 @@ public class Server implements Serializable {
     public Server() {
     }
 
-    public Server(Long id, URL address, ServerType type) {
+    public Server(Long id, String name, String address, ServerType type) {
         this.id = id;
+        this.name = name;
         this.address = address;
         this.type = type;
     }
 
     public Server(ServerDTO server) {
         this.id = server.getId();
+        this.name = server.getName();
         this.address = server.getAddress();
-        this.type = server.getServerType();
+        this.type = server.getType();
     }
 
     public Long getId() {
@@ -46,11 +50,11 @@ public class Server implements Serializable {
         this.id = id;
     }
 
-    public URL getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(URL address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
@@ -60,5 +64,13 @@ public class Server implements Serializable {
 
     public void setType(ServerType type) {
         this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

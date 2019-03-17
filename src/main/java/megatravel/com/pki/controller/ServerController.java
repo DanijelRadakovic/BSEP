@@ -1,8 +1,7 @@
 package megatravel.com.pki.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import megatravel.com.pki.converter.ServerConverter;
 import megatravel.com.pki.domain.DTO.ServerDTO;
+import megatravel.com.pki.converter.ServerConverter;
 import megatravel.com.pki.domain.Server;
 import megatravel.com.pki.service.ServerService;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
