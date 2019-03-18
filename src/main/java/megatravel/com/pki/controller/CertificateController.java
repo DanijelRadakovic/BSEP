@@ -25,11 +25,17 @@ public class CertificateController {
     @Autowired
     private CertificateService certificateService;
 
+//    @Autowired
+//    private CertificateStorage certificateRepository;
+
     @GetMapping
     public ResponseEntity<List<ServerDTO>> findAll() {
         logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
-        certificateService.setServer("root");
-        certificateService.createRootCertificate(new X500Principal("CN=Root, OU=HQ, O=MegaTravel, C=UK"));
+//        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
+//                "327109625", "root");
+//        for (CerAndKey c : ck) {
+//            logger.info(c.getCertificate().toString());
+//        }
         return null;
     }
 

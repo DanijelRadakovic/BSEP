@@ -1,9 +1,12 @@
 package megatravel.com.pki.service;
 
+import megatravel.com.pki.domain.Certificate;
 import megatravel.com.pki.repository.CertificateRepository;
+import megatravel.com.pki.repository.CertificateStorage;
 import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.GeneralException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import sun.security.tools.keytool.CertAndKeyGen;
@@ -20,6 +23,9 @@ import java.util.Date;
 public class CertificateService {
 
     @Autowired
+    private CertificateStorage certificateStorage;
+
+    @Autowired
     private CertificateRepository certificateRepository;
 
     private String server;
@@ -32,15 +38,17 @@ public class CertificateService {
             X509Certificate certificate = gen.getSelfCertificate(X500Name.asX500Name(root),
                     new Date(), (long) 365 * 24 * 3600, exts);
             CerAndKey ck = new CerAndKey(certificate, gen.getPrivateKey());
-            certificateRepository.store(new CerAndKey[]{ck}, server, false, "keys", "zgadija");
+            certificateStorage.store(new CerAndKey[]{ck}, server, false, "keys", "zgadija");
+            certificateRepository.save(new Certificate(null, ck.getCertificate().getSerialNumber().toString(),
+                    ck.getCertificate().getSubjectDN().getName()));
         } catch (IOException | CertificateException | InvalidKeyException | SignatureException
                 | NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new GeneralException("Error occurred while generating certificate", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public void createSignedCertificate(X500Principal subject, String issuer, boolean user) {
-        CerAndKey[] chain = certificateRepository.load("keys", "zgadija", issuer, server);
+        CerAndKey[] chain = certificateStorage.load("keys", "zgadija", issuer, server);
         Principal issuerData = chain[0].getCertificate().getSubjectDN();
         String issuerSigAlg = chain[0].getCertificate().getSigAlgName();
 
@@ -66,11 +74,14 @@ public class CertificateService {
             CerAndKey[] expendedChain = new CerAndKey[chain.length + 1];
             expendedChain[0] = new CerAndKey(outCert, sub.getPrivateKey());
             System.arraycopy(chain, 0, expendedChain, 1, chain.length);
-            certificateRepository.store(expendedChain, server, false, "keys", "zgadija");
-
+            certificateStorage.store(expendedChain, server, false, "keys", "zgadija");
+            certificateRepository.save(new Certificate(null, expendedChain[0].getCertificate().
+                    getSerialNumber().toString(), expendedChain[0].getCertificate().getSubjectDN().getName()));
         } catch (CertificateException | InvalidKeyException | SignatureException |
                 NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
-            e.printStackTrace();
+            throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (DataIntegrityViolationException e) {
+            throw new GeneralException("Serial number is not unique!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

@@ -21,13 +21,21 @@ public class CerAndKey {
     public static CerAndKey[] toChain(Certificate[] certificates, Key privateKey) {
         CerAndKey[] chain = new CerAndKey[certificates.length];
         boolean passedLeaf = false;
-        for (Certificate cer : certificates) {
+        for (int i = 0; i < certificates.length; i++) {
             if (!passedLeaf) {
-                chain[0] = new CerAndKey((X509Certificate) cer, (PrivateKey) privateKey);
+                chain[i] = new CerAndKey((X509Certificate) certificates[i], (PrivateKey) privateKey);
                 passedLeaf = true;
             } else {
-                chain[0] = new CerAndKey((X509Certificate) cer, null);
+                chain[i] = new CerAndKey((X509Certificate) certificates[i], null);
             }
+        }
+        return chain;
+    }
+
+    public static X509Certificate[] toChain(CerAndKey[] certificates) {
+        X509Certificate[] chain = new X509Certificate[certificates.length];
+        for (int i = 0; i < certificates.length; i++) {
+            chain[i] = certificates[i].getCertificate();
         }
         return chain;
     }
