@@ -43,50 +43,9 @@ public class Test {
             chain[0] = keyGen.getSelfCertificate(
                     X500Name.asX500Name(new X500Principal("CN=Root, OU=HQ, O=MegaTravel, C=UK")),
                     new Date(), (long) 365 * 24 * 3600, exts);
-//            FileOutputStream fos = new FileOutputStream("public.cer");
-//            fos.write(chain[0].getEncoded());
-//            fos.close();
-//            chain[0].getSerialNumber();
-//            String alias = "mykey";
-//            char[] password = "password".toCharArray();
-//            String keystore = "testkeys.jks";
-//
-//            //Store the certificate chain
-//            storeKeyAndCertificateChain(alias, password, keystore, keyGen.getPrivateKey(), chain);
-//            //Reload the keystore and display key and certificate chain info
-//            loadAndDisplayChain(alias, password, keystore);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
-
-//    private static void storeKeyAndCertificateChain(String alias, char[] password, String keystore, Key key, X509Certificate[] chain) throws Exception {
-//        KeyStore keyStore = KeyStore.getInstance("jks");
-//        keyStore.load(null, null);
-//
-//        keyStore.setKeyEntry(alias, key, password, chain);
-//        keyStore.store(new FileOutputStream(keystore), password);
-//    }
-//
-//    private static void loadAndDisplayChain(String alias, char[] password, String keystore) throws Exception {
-//        //Reload the keystore
-//        KeyStore keyStore = KeyStore.getInstance("jks");
-//        keyStore.load(new FileInputStream(keystore), password);
-//
-//        Key key = keyStore.getKey(alias, password);
-//
-//        if (key instanceof PrivateKey) {
-//            System.out.println("Get private key : ");
-//            System.out.println(key.toString());
-//
-//            Certificate[] certs = keyStore.getCertificateChain(alias);
-//            System.out.println("Certificate chain length : " + certs.length);
-//            for (Certificate cert : certs) {
-//                System.out.println(cert.toString());
-//            }
-//        } else {
-//            System.out.println("Key is not private key");
-//        }
-//    }
 
 }
