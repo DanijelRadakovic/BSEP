@@ -40,7 +40,7 @@ public class CertificateService {
             CerAndKey ck = new CerAndKey(certificate, gen.getPrivateKey());
             certificateStorage.store(new CerAndKey[]{ck}, server, false, "keys", "zgadija");
             certificateRepository.save(new Certificate(null, ck.getCertificate().getSerialNumber().toString(),
-                    ck.getCertificate().getSubjectDN().getName()));
+                    ck.getCertificate().getSubjectDN().getName(), true));
         } catch (IOException | CertificateException | InvalidKeyException | SignatureException
                 | NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -76,7 +76,8 @@ public class CertificateService {
             System.arraycopy(chain, 0, expendedChain, 1, chain.length);
             certificateStorage.store(expendedChain, server, false, "keys", "zgadija");
             certificateRepository.save(new Certificate(null, expendedChain[0].getCertificate().
-                    getSerialNumber().toString(), expendedChain[0].getCertificate().getSubjectDN().getName()));
+                    getSerialNumber().toString(), expendedChain[0].getCertificate()
+                    .getSubjectDN().getName(), true));
         } catch (CertificateException | InvalidKeyException | SignatureException |
                 NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
             throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);

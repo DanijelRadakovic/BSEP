@@ -14,19 +14,23 @@ public class CertificateDTO implements Serializable {
 
     private String distinguishedName;
 
+    private boolean active;
+
     public CertificateDTO() {
     }
 
-    public CertificateDTO(Long id, String serialNumber, String distinguishedName) {
+    public CertificateDTO(Long id, String serialNumber, String distinguishedName, boolean active) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.distinguishedName = distinguishedName;
+        this.active = active;
     }
 
     public CertificateDTO(Certificate certificate) {
         this.id = certificate.getId();
         this.serialNumber = certificate.getSerialNumber();
         this.distinguishedName = certificate.getDistinguishedName();
+        this.active = certificate.isActive();
     }
 
     public static long getSerialVersionUID() {
@@ -55,5 +59,13 @@ public class CertificateDTO implements Serializable {
 
     public void setDistinguishedName(String distinguishedName) {
         this.distinguishedName = distinguishedName;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

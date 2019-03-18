@@ -1,8 +1,10 @@
 package megatravel.com.pki.controller;
 
+import megatravel.com.pki.domain.Certificate;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
 import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
+import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.service.CertificateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +27,14 @@ public class CertificateController {
     @Autowired
     private CertificateService certificateService;
 
-//    @Autowired
-//    private CertificateStorage certificateRepository;
+    @Autowired
+    private CertificateRepository certificateRepository;
 
     @GetMapping
     public ResponseEntity<List<ServerDTO>> findAll() {
         logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
+        List<Certificate> temp = certificateRepository.findBySerialNumber();
+        logger.info(temp.size() + "");
 //        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
 //                "327109625", "root");
 //        for (CerAndKey c : ck) {

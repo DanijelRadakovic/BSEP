@@ -4,6 +4,8 @@ import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.*;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.FileOutputStream;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ public class Test {
             keyGen.setRandom(SecureRandom.getInstance("SHA1PRNG", "SUN"));
 
             //Generate self signed certificate
-            X509Certificate[] chain = new X509Certificate[1];
+            X509Certificate[] chain = new X509Certificate[2];
             CertificateExtensions exts = new CertificateExtensions();
             exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(false, -1));
             //exts.set(KeyUsageExtension.NAME, new KeyUsageExtension().);
@@ -40,9 +42,14 @@ public class Test {
             access.add(ocsp);
 
             exts.set(AuthorityInfoAccessExtension.NAME, access);
-            chain[0] = keyGen.getSelfCertificate(
-                    X500Name.asX500Name(new X500Principal("CN=Root, OU=HQ, O=MegaTravel, C=UK")),
+            chain[1] = keyGen.getSelfCertificate(
+                    X500Name.asX500Name(new X500Principal("CN=Root2, OU=HQ, O=MegaTravel, C=UK")),
                     new Date(), (long) 365 * 24 * 3600, exts);
+            KeyStore keyStore = KeyStore.getInstance("jks");
+            keyStore.load(null, null);
+
+//            keyStore.setKeyEntry(alias, key, password, chain);
+//            keyStore.store(new FileOutputStream(keystore), password);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
