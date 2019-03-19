@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface CertificateRepository extends JpaRepository<Certificate, Long> {
 
-    @Query(value = "SELECT * FROM certificate", nativeQuery = true)
-    List<Certificate> findBySerialNumber();
+    @Query(value = "SELECT * FROM certificate WHERE number = ?1", nativeQuery = true)
+    List<Certificate> findBySerialNumber(Long serialNumber);
 }

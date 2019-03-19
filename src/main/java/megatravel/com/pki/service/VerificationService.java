@@ -19,14 +19,13 @@ public class VerificationService {
     {
         Date startDate = cert.getNotBefore();
         Date endDate = cert.getNotAfter();
-
         Date today = new Date();
 
         return today.after(startDate) && today.before(endDate);
     }
 
     private boolean verifyCertificate(X509Certificate cert){
-        boolean isActive = databaseRepository.findBySerialNumber().get(0).isActive();
+        boolean isActive = databaseRepository.findBySerialNumber(cert.getSerialNumber().longValue()).get(0).isActive();
         boolean isValidDate = checkDate(cert);
         return isActive && isValidDate;
     }
@@ -47,11 +46,11 @@ public class VerificationService {
         KeyStoreReader keyStoreReader = new KeyStoreReader();
 
         PrivateKey privateKey = keyStoreReader.readPrivateKey(folderAddress,
-                "keyStorePassword", "myKey", "password");
+                "keyStorePassword", "keys", "zgadija");
         boolean valid = true;
-        for (int i = 0; i < certificateList.length; i++) {
+        for (int i = 0; i < certificateList.length - 1; i++) {
             X509Certificate cert = certificateList[i];
-            if (!verifyCertificate(cert) && verifySignature(cert, certificateList[i + 1]) )
+            if (!verifyCertificate(cert) || !verifySignature(cert, certificateList[i + 1]) )
                 valid = false;
         }
         if (valid)

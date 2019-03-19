@@ -5,6 +5,7 @@ import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.repository.CertificateStorage;
 import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.GeneralException;
+import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class CertificateService {
@@ -101,5 +103,12 @@ public class CertificateService {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    public void remove(Long id) {
+        Optional<Certificate> opt = certificateRepository.findById(id);
+        Certificate c = opt.get();
+        c.setActive(false);
+        certificateRepository.save(c);
     }
 }

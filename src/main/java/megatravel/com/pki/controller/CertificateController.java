@@ -1,6 +1,7 @@
 package megatravel.com.pki.controller;
 
 import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
 import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.x500.X500Principal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -30,17 +32,21 @@ public class CertificateController {
     @Autowired
     private CertificateRepository certificateRepository;
 
-    @GetMapping
-    public ResponseEntity<List<ServerDTO>> findAll() {
+    @GetMapping("/findAll")
+    public ResponseEntity<List<CertificateDTO>> findAll() {
         logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
-        List<Certificate> temp = certificateRepository.findBySerialNumber();
-        logger.info(temp.size() + "");
+        List<CertificateDTO> dtoList = new ArrayList<>();
+        List<Certificate> certificateList =  certificateRepository.findAll();
+        for (Certificate c: certificateList) {
+            dtoList.add(new CertificateDTO(c));
+        }
+        return new ResponseEntity<>(dtoList, HttpStatus.OK);
 //        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
 //                "327109625", "root");
 //        for (CerAndKey c : ck) {
 //            logger.info(c.getCertificate().toString());
 //        }
-        return null;
+
     }
 
     /**
@@ -64,5 +70,18 @@ public class CertificateController {
                     request.getIssuer().getSerialNumber(), true);
         }
         return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
+    }
+
+    /**
+     * DELETE /api/cer/remove/{id}
+     *
+     * @param id of certificate that needs to be deleted
+     * @return message about action results
+     */
+    @DeleteMapping(value = "/remove/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> delete(@PathVariable String id) {
+        logger.info("Deleting certificate at time {}.", Calendar.getInstance().getTime());
+        certificateService.remove(Long.parseLong(id));
+        return new ResponseEntity<>("Certificate successfully deleted!", HttpStatus.OK);
     }
 }
