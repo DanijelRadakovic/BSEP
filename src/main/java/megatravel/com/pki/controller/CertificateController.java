@@ -5,8 +5,9 @@ import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
 import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
-import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.service.CertificateService;
+import megatravel.com.pki.service.TransportService;
+import megatravel.com.pki.util.CerAndKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,20 +31,21 @@ public class CertificateController {
     private CertificateService certificateService;
 
     @Autowired
-    private CertificateRepository certificateRepository;
+    private TransportService transportService;
 
     @GetMapping("/findAll")
     public ResponseEntity<List<CertificateDTO>> findAll() {
         logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
         List<CertificateDTO> dtoList = new ArrayList<>();
-        List<Certificate> certificateList =  certificateRepository.findAll();
+        List<Certificate> certificateList =  certificateService.findAll();
         for (Certificate c: certificateList) {
             dtoList.add(new CertificateDTO(c));
         }
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
+
 //        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
 //                "327109625", "root");
-//        for (CerAndKey c : ck) {
+//        for (CerAndKey c : cks) {
 //            logger.info(c.getCertificate().toString());
 //        }
 
@@ -60,15 +62,22 @@ public class CertificateController {
     public ResponseEntity<String> generate(@RequestBody CertificateRequestDTO request) {
         logger.info("Generating certificate at time {}.", Calendar.getInstance().getTime());
         certificateService.setServer(request.getServer());
+        CerAndKey[] chain;
         if (request.getType() == CerType.ROOT) {
             certificateService.createRootCertificate(new X500Principal(request.getX500Name()));
+            return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
         } else if (request.getType() == CerType.INTERMEDIATE) {
-            certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), false);
+            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
+                    request.getIssuer().getSerialNumber(), request.getType());
+            if (request.getDestination() != null && !request.getDestination().equals("")) {
+                transportService.sendCertificate(chain, request.getDestination(), false);
+            }
         } else {
-            certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), true);
+            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
+                    request.getIssuer().getSerialNumber(), request.getType());
+            transportService.sendCertificate(chain, "users", true);
         }
+
         return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
     }
 
