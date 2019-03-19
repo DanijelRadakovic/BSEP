@@ -1,6 +1,7 @@
 package megatravel.com.pki.service;
 
 import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.repository.CertificateStorage;
 import megatravel.com.pki.util.CerAndKey;
@@ -38,7 +39,7 @@ public class CertificateService {
             X509Certificate certificate = gen.getSelfCertificate(X500Name.asX500Name(root),
                     new Date(), (long) 365 * 24 * 3600, exts);
             CerAndKey ck = new CerAndKey(certificate, gen.getPrivateKey());
-            certificateStorage.store(new CerAndKey[]{ck}, server, false, "keys", "zgadija");
+            certificateStorage.store(new CerAndKey[]{ck}, server, CerType.ROOT, "keys", "zgadija");
             certificateRepository.save(new Certificate(null, ck.getCertificate().getSerialNumber().toString(),
                     ck.getCertificate().getSubjectDN().getName(), true));
         } catch (IOException | CertificateException | InvalidKeyException | SignatureException
@@ -47,8 +48,9 @@ public class CertificateService {
         }
     }
 
-    public void createSignedCertificate(X500Principal subject, String issuer, boolean user) {
-        CerAndKey[] chain = certificateStorage.load("keys", "zgadija", issuer, server);
+    public CerAndKey[] createSignedCertificate(X500Principal subject, String issuer, CerType type) {
+        CerAndKey[] chain = certificateStorage.load("keys", "zgadija", issuer, server,
+                CerType.INTERMEDIATE);
         Principal issuerData = chain[0].getCertificate().getSubjectDN();
         String issuerSigAlg = chain[0].getCertificate().getSigAlgName();
 
@@ -60,7 +62,7 @@ public class CertificateService {
             info.set(X509CertInfo.ISSUER, issuerData);
 
             CertificateExtensions exts = new CertificateExtensions();
-            if (user) {
+            if (type == CerType.USER) {
                 exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(false, -1));
             } else {
                 exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(true, -1));
@@ -74,10 +76,11 @@ public class CertificateService {
             CerAndKey[] expendedChain = new CerAndKey[chain.length + 1];
             expendedChain[0] = new CerAndKey(outCert, sub.getPrivateKey());
             System.arraycopy(chain, 0, expendedChain, 1, chain.length);
-            certificateStorage.store(expendedChain, server, false, "keys", "zgadija");
+            certificateStorage.store(expendedChain, server, type, "keys", "zgadija");
             certificateRepository.save(new Certificate(null, expendedChain[0].getCertificate().
                     getSerialNumber().toString(), expendedChain[0].getCertificate()
                     .getSubjectDN().getName(), true));
+            return expendedChain;
         } catch (CertificateException | InvalidKeyException | SignatureException |
                 NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
             throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
