@@ -1,7 +1,8 @@
 package megatravel.com.pki.controller;
 
+import megatravel.com.pki.converter.CertificateConverter;
+import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
-import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.service.CertificateService;
 import megatravel.com.pki.service.TransportService;
@@ -31,17 +32,10 @@ public class CertificateController {
     private TransportService transportService;
 
     @GetMapping
-    public ResponseEntity<List<ServerDTO>> findAll() {
-        logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
-        //CerAndKey[] cks = certificateStorage.load("keys", "zgadija", "1712030549", "london", CerType.USER);
-//        List<Certificate> temp = certificateRepository.findBySerialNumber();
-//        logger.info(temp.size() + "");
-//        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
-//                "327109625", "root");
-//        for (CerAndKey c : cks) {
-//            logger.info(c.getCertificate().toString());
-//        }
-        return null;
+    public ResponseEntity<List<CertificateDTO>> findAll() {
+        logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.getAll(),
+                CertificateDTO::new), HttpStatus.OK);
     }
 
     /**

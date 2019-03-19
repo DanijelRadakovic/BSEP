@@ -19,6 +19,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CertificateService {
@@ -30,6 +31,8 @@ public class CertificateService {
     private CertificateRepository certificateRepository;
 
     private String server;
+
+    public List<Certificate> getAll() { return certificateRepository.findAll(); }
 
     public void createRootCertificate(X500Principal root) {
         CertAndKeyGen gen = generateKeyPair();
