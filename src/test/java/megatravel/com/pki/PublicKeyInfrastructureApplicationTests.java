@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class PublicKeyInfrasturcureApplicationTests {
+public class PublicKeyInfrastructureApplicationTests {
 
     @Test
     public void contextLoads() {

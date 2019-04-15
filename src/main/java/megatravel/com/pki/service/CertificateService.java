@@ -20,6 +20,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class CertificateService {
@@ -32,7 +34,9 @@ public class CertificateService {
 
     private String server;
 
-    public List<Certificate> getAll() { return certificateRepository.findAll(); }
+    public List<Certificate> getAll() {
+        return certificateRepository.findAll();
+    }
 
     public void createRootCertificate(X500Principal root) {
         CertAndKeyGen gen = generateKeyPair();
@@ -107,5 +111,16 @@ public class CertificateService {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    public void remove(Long id) {
+        Optional<Certificate> opt = certificateRepository.findById(id);
+        Certificate c = opt.get();
+        c.setActive(false);
+        certificateRepository.save(c);
+    }
+
+    public List<Certificate> findAll() {
+        return certificateRepository.findAll();
     }
 }
