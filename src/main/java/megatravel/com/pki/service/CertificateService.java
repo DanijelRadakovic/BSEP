@@ -6,7 +6,6 @@ import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.repository.CertificateStorage;
 import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.GeneralException;
-import org.bouncycastle.asn1.crmf.CertTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

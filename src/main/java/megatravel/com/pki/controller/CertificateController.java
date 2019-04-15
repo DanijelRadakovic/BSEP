@@ -3,7 +3,6 @@ package megatravel.com.pki.controller;
 import megatravel.com.pki.domain.Certificate;
 import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
-import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.service.CertificateService;
 import megatravel.com.pki.service.TransportService;
