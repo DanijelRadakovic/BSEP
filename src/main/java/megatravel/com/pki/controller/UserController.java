@@ -37,7 +37,7 @@ public class UserController {
             logger.info("Trying to find user with id=" + id + " at " +  Calendar.getInstance().getTime());
             User user = userService.findById(id);
             logger.info("Successfully found user with id=" + id + " at " + Calendar.getInstance().getTime());
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            return new ResponseEntity<>(UserConverter.fromRegisteringEntity(user), HttpStatus.OK);
         }catch(GeneralException e){
             logger.warn("User with id=" + id + "now found, time: " + Calendar.getInstance().getTime());
             return new ResponseEntity<>(e.getMessage(), e.getHttpStatus());

@@ -1,24 +1,20 @@
 package megatravel.com.pki.domain.DTO;
 
-import megatravel.com.pki.domain.Role;
-import megatravel.com.pki.domain.enums.UserType;
+import megatravel.com.pki.converter.AbstractConverter;
 
 import java.util.Set;
 
-public class RegisteringDTO {
+public class UserDTO extends AbstractConverter {
 
     private String username;
 
-    private String password;
-
     private Set<RoleDTO> roles;
 
-    public RegisteringDTO() {
+    public UserDTO() {
     }
 
-    public RegisteringDTO(String username, String password, Set<RoleDTO> roles) {
+    public UserDTO(String username, String password, Set<RoleDTO> roles) {
         this.username = username;
-        this.password = password;
         this.roles = roles;
     }
 
@@ -30,14 +26,6 @@ public class RegisteringDTO {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Set<RoleDTO> getRoles() {
         return roles;
     }
@@ -45,4 +33,5 @@ public class RegisteringDTO {
     public void setRoles(Set<RoleDTO> roles) {
         this.roles = roles;
     }
+
 }
