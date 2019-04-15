@@ -1,9 +1,13 @@
 package megatravel.com.pki.controller;
 
+import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
 import megatravel.com.pki.domain.DTO.ServerDTO;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.service.CertificateService;
+import megatravel.com.pki.service.TransportService;
+import megatravel.com.pki.util.CerAndKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.x500.X500Principal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -25,12 +30,25 @@ public class CertificateController {
     @Autowired
     private CertificateService certificateService;
 
-    @GetMapping
-    public ResponseEntity<List<ServerDTO>> findAll() {
+    @Autowired
+    private TransportService transportService;
+
+    @GetMapping("/findAll")
+    public ResponseEntity<List<CertificateDTO>> findAll() {
         logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
-        certificateService.setServer("root");
-        certificateService.createRootCertificate(new X500Principal("CN=Root, OU=HQ, O=MegaTravel, C=UK"));
-        return null;
+        List<CertificateDTO> dtoList = new ArrayList<>();
+        List<Certificate> certificateList =  certificateService.findAll();
+        for (Certificate c: certificateList) {
+            dtoList.add(new CertificateDTO(c));
+        }
+        return new ResponseEntity<>(dtoList, HttpStatus.OK);
+
+//        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
+//                "327109625", "root");
+//        for (CerAndKey c : cks) {
+//            logger.info(c.getCertificate().toString());
+//        }
+
     }
 
     /**
@@ -44,15 +62,35 @@ public class CertificateController {
     public ResponseEntity<String> generate(@RequestBody CertificateRequestDTO request) {
         logger.info("Generating certificate at time {}.", Calendar.getInstance().getTime());
         certificateService.setServer(request.getServer());
+        CerAndKey[] chain;
         if (request.getType() == CerType.ROOT) {
             certificateService.createRootCertificate(new X500Principal(request.getX500Name()));
+            return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
         } else if (request.getType() == CerType.INTERMEDIATE) {
-            certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), false);
+            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
+                    request.getIssuer().getSerialNumber(), request.getType());
+            if (request.getDestination() != null && !request.getDestination().equals("")) {
+                transportService.sendCertificate(chain, request.getDestination(), false);
+            }
         } else {
-            certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), true);
+            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
+                    request.getIssuer().getSerialNumber(), request.getType());
+            transportService.sendCertificate(chain, "users", true);
         }
+
         return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
+    }
+
+    /**
+     * DELETE /api/cer/remove/{id}
+     *
+     * @param id of certificate that needs to be deleted
+     * @return message about action results
+     */
+    @DeleteMapping(value = "/remove/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> delete(@PathVariable String id) {
+        logger.info("Deleting certificate at time {}.", Calendar.getInstance().getTime());
+        certificateService.remove(Long.parseLong(id));
+        return new ResponseEntity<>("Certificate successfully deleted!", HttpStatus.OK);
     }
 }
