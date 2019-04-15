@@ -16,13 +16,14 @@ public class Role implements Serializable {
     @Column
     private String name;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "user_role",
-            joinColumns = { @JoinColumn(name = "role_id") },
-            inverseJoinColumns = { @JoinColumn(name = "user_id") }
-    )
+    @ManyToMany(mappedBy = "roles")
     private Set<User> users;
+
+    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    @JoinTable(name = "role_privilege",
+            joinColumns = {@JoinColumn(name = "role_id")},
+            inverseJoinColumns = { @JoinColumn(name = "privilege_id")})
+    private Set<Privilege> privileges;
 
 
     public Role() {
@@ -56,5 +57,13 @@ public class Role implements Serializable {
 
     public void setUsers(Set<User> users) {
         this.users = users;
+    }
+
+    public Set<Privilege> getPrivileges() {
+        return privileges;
+    }
+
+    public void setPrivileges(Set<Privilege> privileges) {
+        this.privileges = privileges;
     }
 }
