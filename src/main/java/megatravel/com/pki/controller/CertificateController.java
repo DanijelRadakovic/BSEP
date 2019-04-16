@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,6 +62,7 @@ public class CertificateController {
 
 
     @GetMapping
+    @PreAuthorize("hasAuthority('GENCERT')")
     public ResponseEntity<List<CertificateDTO>> getAll() {
         logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
         return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.getAll(),

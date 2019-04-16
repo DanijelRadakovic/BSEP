@@ -1,9 +1,6 @@
 package megatravel.com.pki.converter;
 
-import megatravel.com.pki.domain.DTO.PrivilegeDTO;
-import megatravel.com.pki.domain.DTO.RegisteringDTO;
-import megatravel.com.pki.domain.DTO.RoleDTO;
-import megatravel.com.pki.domain.DTO.UserDTO;
+import megatravel.com.pki.domain.DTO.*;
 import megatravel.com.pki.domain.Privilege;
 import megatravel.com.pki.domain.Role;
 import megatravel.com.pki.domain.User;
@@ -27,7 +24,7 @@ public class UserConverter extends AbstractConverter {
         User user = new User();
         user.setUsername(dto.getUsername());
         byte[] salt = generateSalt();
-        user.setSalt(salt);
+        //user.setSalt(salt);
         user.setPassword(hashPassword(dto.getPassword(), salt));
         return user;
     }
@@ -72,17 +69,25 @@ public class UserConverter extends AbstractConverter {
      * @param salt - hehe :D
      * @return hashed password
      */
-    private static byte[] hashPassword(String password, byte[] salt){
+    private static String hashPassword(String password, byte[] salt){
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 255);
         Arrays.fill(password.toCharArray(), Character.MIN_VALUE);
-        try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            return skf.generateSecret(spec).getEncoded();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new AssertionError("Error while hashing a password: " + e.getMessage(), e);
-        } finally {
-            spec.clearPassword();
-        }
+        return null;
+//        try {
+//            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+//
+//            //return skf.generateSecret(spec).getEncoded();
+//        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+//            throw new AssertionError("Error while hashing a password: " + e.getMessage(), e);
+//        } finally {
+//            spec.clearPassword();
+//        }
+    }
+
+
+    public static LoggedUserDTO fromLoggedEntity(User entity) {
+        return new LoggedUserDTO(entity);
+
     }
 
 }

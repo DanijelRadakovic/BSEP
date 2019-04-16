@@ -1,11 +1,13 @@
 package megatravel.com.pki.domain;
 
+import org.springframework.security.core.GrantedAuthority;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
 
 @Entity
-public class Privilege implements Serializable {
+public class Privilege implements Serializable, GrantedAuthority {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,5 +52,10 @@ public class Privilege implements Serializable {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String getAuthority() {
+        return name;
     }
 }

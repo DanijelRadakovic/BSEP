@@ -3,11 +3,14 @@ package megatravel.com.pki.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import megatravel.com.pki.domain.enums.UserType;
 import org.hibernate.annotations.Type;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 public class User implements Serializable {
@@ -21,13 +24,16 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String username;
 
-    @Column(columnDefinition = "BINARY(255)")
-    @JsonIgnore
-    private byte[] password;
+//    @Column(columnDefinition = "BINARY(255)")
+//    @JsonIgnore
+//    private byte[] password;
 
-    @Column(columnDefinition = "BINARY(64)")
-    @JsonIgnore
-    private byte[] salt;
+    @Column(nullable = false)
+    private String password;
+
+//    @Column(columnDefinition = "BINARY(64)")
+//    @JsonIgnore
+//    private byte[] salt;
 
     @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
     @JoinTable( name = "user_role",
@@ -39,7 +45,7 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(Long id, String username, byte[] password, Set<Role> roles) {
+    public User(Long id, String username, String password, Set<Role> roles) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -62,19 +68,19 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public byte[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(byte[] password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public void setSalt(byte[] salt) {
-        this.salt = salt;
-    }
-
-    public byte[] getSalt(){return this.salt;}
+//    public void setSalt(byte[] salt) {
+//        this.salt = salt;
+//    }
+//
+//    public byte[] getSalt(){return this.salt;}
 
     public Set<Role> getRoles() {
         return roles;
@@ -82,5 +88,11 @@ public class User implements Serializable {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        this.roles.forEach(role -> authorities.addAll(role.getPrivileges()));
+        return authorities;
     }
 }
