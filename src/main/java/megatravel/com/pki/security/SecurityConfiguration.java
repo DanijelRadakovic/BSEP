@@ -70,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf()
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).and()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable()
                 .cors().and()
                 .exceptionHandling()
                 .authenticationEntryPoint(unauthorizedHandler)

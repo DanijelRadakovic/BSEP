@@ -112,7 +112,6 @@ public class UserController {
 
     /**
      * POST /api/user/auth
-     * <p>
      * Authenticates a user in the system.
      *
      * @param authenticationRequest DTO with user's login credentials
