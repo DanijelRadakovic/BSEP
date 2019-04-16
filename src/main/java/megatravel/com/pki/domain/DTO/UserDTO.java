@@ -1,8 +1,6 @@
 package megatravel.com.pki.domain.DTO;
 
 
-import megatravel.com.pki.domain.User;
-
 public class UserDTO {
 
     private Long id;
