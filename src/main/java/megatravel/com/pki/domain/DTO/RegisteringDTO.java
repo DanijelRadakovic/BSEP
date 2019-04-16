@@ -1,6 +1,9 @@
 package megatravel.com.pki.domain.DTO;
 
+import megatravel.com.pki.domain.Role;
 import megatravel.com.pki.domain.enums.UserType;
+
+import java.util.Set;
 
 public class RegisteringDTO {
 
@@ -8,15 +11,15 @@ public class RegisteringDTO {
 
     private String password;
 
-    private UserType type;
+    private Set<RoleDTO> roles;
 
     public RegisteringDTO() {
     }
 
-    public RegisteringDTO(String username, String password, UserType type) {
+    public RegisteringDTO(String username, String password, Set<RoleDTO> roles) {
         this.username = username;
         this.password = password;
-        this.type = type;
+        this.roles = roles;
     }
 
     public String getUsername() {
@@ -35,11 +38,11 @@ public class RegisteringDTO {
         this.password = password;
     }
 
-    public UserType getType() {
-        return type;
+    public Set<RoleDTO> getRoles() {
+        return roles;
     }
 
-    public void setType(UserType type) {
-        this.type = type;
+    public void setRoles(Set<RoleDTO> roles) {
+        this.roles = roles;
     }
 }

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 public class CertificateService {
 
@@ -32,6 +33,10 @@ public class CertificateService {
     private CertificateRepository certificateRepository;
 
     private String server;
+
+    public List<Certificate> getAll() {
+        return certificateRepository.findAll();
+    }
 
     public void createRootCertificate(X500Principal root) {
         CertAndKeyGen gen = generateKeyPair();
@@ -115,8 +120,7 @@ public class CertificateService {
         certificateRepository.save(c);
     }
 
-    public List<Certificate> findAll()
-    {
+    public List<Certificate> findAll() {
         return certificateRepository.findAll();
     }
 }

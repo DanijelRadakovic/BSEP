@@ -14,7 +14,7 @@ public class CertificateConverter extends AbstractConverter {
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            certificates.add(new CertificateDTO(null, (String) pair.getKey(),
+            certificates.add(new CertificateDTO(0L, (String) pair.getKey(),
                     (String) pair.getValue(), true));
             it.remove(); // avoids a ConcurrentModificationException
         }

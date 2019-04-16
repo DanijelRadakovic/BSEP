@@ -1,5 +1,6 @@
 package megatravel.com.pki.service;
 
+import megatravel.com.pki.domain.User;
 import megatravel.com.pki.repository.UserRepository;
 import megatravel.com.pki.util.GeneralException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +106,8 @@ public class UserService {
         try{
             User user = userRepository.findUserByUsername(username);
             if (user != null){
-                return (authenticate(password, user.getPassword(), user.getSalt()) ? user : null);
+                return user;
+                //return (authenticate(password, user.getPassword(), user.getSalt()) ? user : null);
             }
             else{
                 throw new GeneralException("Inserted combination of username and password isn't correct!",HttpStatus.BAD_REQUEST);
@@ -122,17 +124,17 @@ public class UserService {
      * @param salt - hehe :D
      * @return true is user password is OK, false if not
      */
-    private boolean authenticate(String attemptedPassword, byte[] storedPassword, byte[] salt) {
+    private boolean authenticate(String attemptedPassword, String storedPassword, byte[] salt) {
         byte[] pwdHash = new byte[255];
         byte[] hashed = hashPassword(attemptedPassword, salt);
         for(int i = 0; i < hashed.length; i++){
             pwdHash[i] = hashed[i];
         }
-        Arrays.fill(attemptedPassword.toCharArray(), Character.MIN_VALUE);
-        if (pwdHash.length != storedPassword.length) return false;
-        for (int i = 0; i < pwdHash.length; i++) {
-            if (pwdHash[i] != storedPassword[i]) return false;
-        }
+//        Arrays.fill(attemptedPassword.toCharArray(), Character.MIN_VALUE);
+//        if (pwdHash.length != storedPassword.length) return false;
+//        for (int i = 0; i < pwdHash.length; i++) {
+//            if (pwdHash[i] != storedPassword[i]) return false;
+//        }
         return true;
     }
 
@@ -155,4 +157,8 @@ public class UserService {
         }
     }
 
+
+    public User findByUsername(String username) {
+        return userRepository.findUserByUsername(username);
+    }
 }

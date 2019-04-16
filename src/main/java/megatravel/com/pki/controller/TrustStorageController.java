@@ -35,7 +35,7 @@ public class TrustStorageController {
     public ResponseEntity<List<CertificateDTO>> findTrustStorage(@PathVariable String id) {
         logger.info("Requesting trust storage with serial number {} at time {}.", id, Calendar.getInstance().getTime());
         return new ResponseEntity<>(CertificateConverter.fromMapToDTO(trustStorageService.getTrustStorage(id)),
-                HttpStatus.FOUND);
+                HttpStatus.OK);
     }
 
     /**
