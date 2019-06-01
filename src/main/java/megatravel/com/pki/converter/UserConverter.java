@@ -1,17 +1,13 @@
 package megatravel.com.pki.converter;
 
 import megatravel.com.pki.domain.DTO.*;
-import megatravel.com.pki.domain.Privilege;
-import megatravel.com.pki.domain.Role;
-import megatravel.com.pki.domain.User;
-import megatravel.com.pki.domain.enums.UserType;
+import megatravel.com.pki.domain.rbac.Privilege;
+import megatravel.com.pki.domain.rbac.Role;
+import megatravel.com.pki.domain.rbac.User;
 
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.nio.ByteBuffer;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;

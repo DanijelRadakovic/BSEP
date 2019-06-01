@@ -1,6 +1,6 @@
 package megatravel.com.pki.repository;
 
-import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.cert.Certificate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Calendar;
 import java.util.List;
 
 @RestController
@@ -31,7 +30,7 @@ public class ServerController {
      */
     @GetMapping
     public ResponseEntity<List<ServerDTO>> findAll() {
-        logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
+        logger.info("action=getAllServers status=success");
         return new ResponseEntity<>(ServerConverter.fromEntityList(serverService.getAll(), ServerDTO::new),
                 HttpStatus.OK);
     }
@@ -44,7 +43,7 @@ public class ServerController {
      */
     @GetMapping("{id}")
     public ResponseEntity<ServerDTO> findById(@PathVariable String id) {
-        logger.info("Requesting server with id {} at time {}.", id, Calendar.getInstance().getTime());
+        logger.info("serverId={} action=get status=success", id);
         return new ResponseEntity<>(new ServerDTO(serverService.findById(Long.parseLong(id))), HttpStatus.FOUND);
     }
 
@@ -57,7 +56,7 @@ public class ServerController {
     @PostMapping()
     //@PreAuthorize("hasAuthority('SECADMIN')")
     public ResponseEntity<ServerDTO> save(@RequestBody ServerDTO server) {
-        logger.info("Adding vehicle with at time {}.", Calendar.getInstance().getTime());
+        logger.info("action=saveServer status=success");
         return new ResponseEntity<>(new ServerDTO(serverService.save(new Server(server))), HttpStatus.OK);
     }
 
@@ -70,8 +69,8 @@ public class ServerController {
     @DeleteMapping(value = "{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     //@PreAuthorize("hasAuthority('SECADMIN')")
     public ResponseEntity<String> delete(@PathVariable String id) {
-        logger.info("Deleting server at time {}.", Calendar.getInstance().getTime());
         serverService.remove(Long.parseLong(id));
+        logger.info("serverId={} action=removeServer status=success", id);
         return new ResponseEntity<>("Server successfully deleted!", HttpStatus.OK);
     }
 }

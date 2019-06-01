@@ -1,6 +1,6 @@
 package megatravel.com.pki.service;
 
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.rbac.User;
 import megatravel.com.pki.repository.UserRepository;
 import megatravel.com.pki.util.GeneralException;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,14 +1,9 @@
 package megatravel.com.pki.domain.DTO;
 
-import java.io.Serializable;
 import java.util.List;
 
-public class TrustStorageDTO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class TrustStorageDTO {
     private String target;
-
     private List<String> serialNumbers;
 
     public TrustStorageDTO() {
@@ -17,10 +12,6 @@ public class TrustStorageDTO implements Serializable {
     public TrustStorageDTO(String target, List<String> serialNumbers) {
         this.target = target;
         this.serialNumbers = serialNumbers;
-    }
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
     }
 
     public String getTarget() {

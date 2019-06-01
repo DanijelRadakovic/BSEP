@@ -1,6 +1,6 @@
 package megatravel.com.pki.service;
 
-import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.cert.Certificate;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.repository.CertificateStorage;
@@ -34,7 +34,7 @@ public class CertificateService {
 
     private String server;
 
-    public List<Certificate> getAll() {
+    public List<Certificate> findAll() {
         return certificateRepository.findAll();
     }
 
@@ -118,9 +118,5 @@ public class CertificateService {
         Certificate c = opt.get();
         c.setActive(false);
         certificateRepository.save(c);
-    }
-
-    public List<Certificate> findAll() {
-        return certificateRepository.findAll();
     }
 }

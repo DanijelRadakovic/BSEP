@@ -39,30 +39,30 @@ public class VerificationService {
         }
     }
 
-    public byte[] verifyCertificateChain(X509Certificate[] certificateList, String folderAddress) {
-        KeyStoreReader keyStoreReader = new KeyStoreReader();
-
-        PrivateKey privateKey = keyStoreReader.readPrivateKey(folderAddress,
-                "keyStorePassword", "keys", "zgadija");
-        boolean valid = true;
-        for (int i = 0; i < certificateList.length - 1; i++) {
-            X509Certificate cert = certificateList[i];
-            if (!verifyCertificate(cert) || !verifySignature(cert, certificateList[i + 1]) )
-
-                valid = false;
-        }
-        if (valid) {
-            Signature sig = null;
-            try {
-                sig = Signature.getInstance("SHA1withRSA");
-                sig.initSign(privateKey);
-                sig.update("Valid".getBytes());
-                return sig.sign();
-            } catch (Exception e) {
-                return new byte[0];
-            }
-        }
-        return new byte[0];
-    }
+//    public byte[] verifyCertificateChain(X509Certificate[] certificateList, String folderAddress) {
+//        KeyStoreReader keyStoreReader = new KeyStoreReader();
+//
+//        PrivateKey privateKey = keyStoreReader.readPrivateKey(folderAddress,
+//                "keyStorePassword", "keys", "zgadija");
+//        boolean valid = true;
+//        for (int i = 0; i < certificateList.length - 1; i++) {
+//            X509Certificate cert = certificateList[i];
+//            if (!verifyCertificate(cert) || !verifySignature(cert, certificateList[i + 1]) )
+//
+//                valid = false;
+//        }
+//        if (valid) {
+//            Signature sig = null;
+//            try {
+//                sig = Signature.getInstance("SHA1withRSA");
+//                sig.initSign(privateKey);
+//                sig.update("Valid".getBytes());
+//                return sig.sign();
+//            } catch (Exception e) {
+//                return new byte[0];
+//            }
+//        }
+//        return new byte[0];
+//    }
 
 }

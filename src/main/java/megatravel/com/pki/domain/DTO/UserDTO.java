@@ -1,14 +1,10 @@
 package megatravel.com.pki.domain.DTO;
 
 
-import megatravel.com.pki.converter.AbstractConverter;
-
 import java.util.Set;
 
-public class UserDTO extends AbstractConverter {
-
+public class UserDTO {
     private String username;
-
     private Set<RoleDTO> roles;
 
     public UserDTO() {

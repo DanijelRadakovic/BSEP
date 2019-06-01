@@ -1,6 +1,6 @@
 package megatravel.com.pki.service.security;
 
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.rbac.User;
 import megatravel.com.pki.domain.security.UserDetailsImpl;
 
 /**

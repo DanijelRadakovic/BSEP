@@ -1,6 +1,4 @@
-package megatravel.com.pki.domain;
-
-import megatravel.com.pki.domain.DTO.CertificateDTO;
+package megatravel.com.pki.domain.cert;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,10 +12,10 @@ public class Certificate implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String serialNumber;
 
-    @Column
+    @Column(unique = true)
     private String distinguishedName;
 
     @Column(nullable = false)
@@ -31,13 +29,6 @@ public class Certificate implements Serializable {
         this.serialNumber = serialNumber;
         this.distinguishedName = distinguishedName;
         this.active = active;
-    }
-
-    public Certificate(CertificateDTO certificate) {
-        this.id = certificate.getId();
-        this.serialNumber = certificate.getSerialNumber();
-        this.distinguishedName = certificate.getDistinguishedName();
-        this.active = certificate.isActive();
     }
 
     public static long getSerialVersionUID() {

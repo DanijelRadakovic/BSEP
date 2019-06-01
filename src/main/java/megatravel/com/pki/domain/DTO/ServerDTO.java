@@ -3,18 +3,10 @@ package megatravel.com.pki.domain.DTO;
 import megatravel.com.pki.domain.Server;
 import megatravel.com.pki.domain.enums.ServerType;
 
-import java.io.Serializable;
-
-public class ServerDTO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class ServerDTO {
     private Long id;
-
     private String name;
-
     private String address;
-
     private ServerType type;
 
     public ServerDTO() {
@@ -32,10 +24,6 @@ public class ServerDTO implements Serializable {
         this.name = server.getName();
         this.address = server.getAddress();
         this.type = server.getType();
-    }
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
     }
 
     public Long getId() {

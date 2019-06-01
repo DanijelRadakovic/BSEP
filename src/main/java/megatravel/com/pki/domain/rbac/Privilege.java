@@ -1,4 +1,4 @@
-package megatravel.com.pki.domain;
+package megatravel.com.pki.domain.rbac;
 
 import org.springframework.security.core.GrantedAuthority;
 

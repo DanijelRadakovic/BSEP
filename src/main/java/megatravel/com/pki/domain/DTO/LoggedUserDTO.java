@@ -1,7 +1,7 @@
 package megatravel.com.pki.domain.DTO;
 
 
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.rbac.User;
 
 public class LoggedUserDTO {
 

@@ -1,8 +1,12 @@
 package megatravel.com.pki.repository;
 
+import megatravel.com.pki.config.AppConfig;
+import megatravel.com.pki.domain.cert.IssuerData;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.GeneralException;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +26,47 @@ import java.util.Objects;
 @Repository
 public class CertificateStorage {
 
+    @Autowired
+    private AppConfig config;
+
+    public void store(X509Certificate[] chain, PrivateKey privateKey) {
+        char[] password = config.getKeystorePassword().toCharArray();
+        String serialNumber = chain[0].getSerialNumber().toString();
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            try {
+                keyStore.load(new FileInputStream(config.getKeystore()), password);
+            } catch (IOException e) {
+                keyStore.load(null, null);
+            }
+
+            keyStore.setKeyEntry(serialNumber, privateKey, serialNumber.toCharArray(), chain);
+            keyStore.store(new FileOutputStream(config.getKeystore()), password);
+        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+            throw new GeneralException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public IssuerData findCAbySerialNumber(String serialNumber) {
+        char[] password = config.getKeystorePassword().toCharArray();
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(new FileInputStream(config.getKeystore()), password);
+
+            Key key = keyStore.getKey(serialNumber, serialNumber.toCharArray());
+            if (key instanceof PrivateKey) {
+                X509Certificate cert = (X509Certificate) keyStore.getCertificate(serialNumber);
+                return new IssuerData((PrivateKey) key,
+                        new JcaX509CertificateHolder(cert).getSubject(), cert.getPublicKey(), cert.getSerialNumber());
+            } else {
+                throw new GeneralException("Error occurred while storing certificate!",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException |
+                UnrecoverableKeyException e) {
+            throw new GeneralException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     public CerAndKey[] load(String alias, String password, String keystore,
                             String server, CerType type) {

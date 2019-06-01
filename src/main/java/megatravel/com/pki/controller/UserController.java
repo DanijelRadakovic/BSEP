@@ -1,27 +1,27 @@
 package megatravel.com.pki.controller;
 
 import megatravel.com.pki.converter.UserConverter;
-import megatravel.com.pki.domain.DTO.*;
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.DTO.AuthenticationRequestDTO;
+import megatravel.com.pki.domain.DTO.AuthenticationResponseDTO;
+import megatravel.com.pki.domain.DTO.LoggedUserDTO;
+import megatravel.com.pki.domain.DTO.RegisteringDTO;
+import megatravel.com.pki.domain.rbac.User;
 import megatravel.com.pki.security.TokenUtils;
 import megatravel.com.pki.service.UserService;
 import megatravel.com.pki.util.GeneralException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import org.slf4j.Logger;
-
 import javax.validation.Valid;
-import java.util.Calendar;
 import java.util.List;
 
 @Controller
@@ -44,38 +44,37 @@ public class UserController {
 
     /**
      * Endpoint for request for getting use by id
+     *
      * @param id - given id through url
      * @return user with given ID with OK, or BAD_REQUEST if snot found with given ID
      */
     @GetMapping("{id}")
-    public ResponseEntity<Object> getById(@PathVariable Long id){
-        try{
-            logger.info("Trying to find user with id=" + id + " at " +  Calendar.getInstance().getTime());
+    public ResponseEntity<Object> getById(@PathVariable Long id) {
+        try {
             User user = userService.findById(id);
-            logger.info("Successfully found user with id=" + id + " at " + Calendar.getInstance().getTime());
+            logger.info("userId={} action=get status=success", id);
             return new ResponseEntity<>(UserConverter.fromRegisteringEntity(user), HttpStatus.OK);
-        }catch(GeneralException e){
-            logger.warn("User with id=" + id + "now found, time: " + Calendar.getInstance().getTime());
+        } catch (GeneralException e) {
+            logger.warn("userId={} action=get status=failure", id);
             return new ResponseEntity<>(e.getMessage(), e.getHttpStatus());
-        }catch(Exception e1){
-            logger.error("Failed to get user with id=" + id + ", error message: "
-                    + e1.getMessage() + ", time: " + Calendar.getInstance().getTime());
+        } catch (Exception e1) {
+            logger.error("userId={} action=get status=failure message={}", id, e1.getMessage());
             return new ResponseEntity<>(e1.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
     /**
      * Endpoint for getting all users
+     *
      * @return list of users, or BAD_REQUEST if something went wrong
      */
-    @GetMapping()
-    public ResponseEntity<List<User>> getAllUsers(){
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
         try {
-            logger.info("Fetching all users at " + Calendar.getInstance().getTime());
+            logger.info("action=getAllUsers status=success");
             return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
-        }catch(Exception e){
-            logger.error("Failed to get all users, error message: " + e.getMessage()
-                    + ", time: " + Calendar.getInstance().getTime());
+        } catch (Exception e) {
+            logger.error("action=getAllUsers status=failure message={}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -121,48 +120,41 @@ public class UserController {
     public ResponseEntity<Object> login(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest) {
         try {
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
+                            authenticationRequest.getPassword());
 
-            Authentication authentication = authenticationManager.authenticate(authToken);
-
-            //SecurityContextHolder.getContext().setAuthentication(authentication);
+            authenticationManager.authenticate(authToken);
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
             LoggedUserDTO user = UserConverter.fromLoggedEntity(userService.findByUsername(userDetails.getUsername()));
             String token = tokenUtils.generateToken(userDetails);
 
-            logger.info("Successfully logged in.");
+            logger.info("username={} action=login status=success", authenticationRequest.getUsername());
             return new ResponseEntity<>(new AuthenticationResponseDTO(user, token), HttpStatus.OK);
-            //}
-        /*logger.info("Failed to login, incorrect combination od username and password");
-        return new ResponseEntity<Object>("Incorrect username or password, or user is not activated.",
-                HttpStatus.BAD_REQUEST);*/
-        }catch (Exception e){
+        } catch (Exception e) {
+            logger.info("username={} action=login status=failure", authenticationRequest.getUsername());
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
     /**
      * Endpoint for registering new user
+     *
      * @param registeringDTO - all required data for new user
      * @return user if successfully registered, or message if error happened
      */
     @PostMapping("register")
-    public ResponseEntity<Object> register(@RequestBody RegisteringDTO registeringDTO){
-        try{
-            logger.info("Trying to register new user with username: " + registeringDTO.getUsername() +
-                    " at " + Calendar.getInstance().getTime());
+    public ResponseEntity<Object> register(@RequestBody RegisteringDTO registeringDTO) {
+        try {
             User user = userService.register(UserConverter.toRegisteringEntity(registeringDTO));
-            logger.info("Successfully registered user with username " + registeringDTO.getUsername() +
-                    " at " + Calendar.getInstance().getTime());
+            logger.info("username={} action=signUp status=success", registeringDTO.getUsername());
             return new ResponseEntity<>(user, HttpStatus.CREATED);
-        }catch(GeneralException e){
-            logger.warn("User registration failed, username " + registeringDTO.getUsername() +
-                    " already exists, time " + Calendar.getInstance().getTime());
+        } catch (GeneralException e) {
+            logger.warn("username={} action=signUp status=failure", registeringDTO.getUsername());
             return new ResponseEntity<>(e.getMessage(), e.getHttpStatus());
-        }catch(Exception e1){
-            logger.error("Error while trying to register happened, message: " + e1.getMessage() + ", time: "
-                    + Calendar.getInstance().getTime());
+        } catch (Exception e1) {
+            logger.error("username={} action=signUp status=failure message={}",
+                    registeringDTO.getUsername(), e1.getMessage());
             return new ResponseEntity<>(e1.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,7 +1,7 @@
 package megatravel.com.pki.service.security;
 
 
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.rbac.User;
 import megatravel.com.pki.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

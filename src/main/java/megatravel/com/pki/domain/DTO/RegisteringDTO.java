@@ -1,8 +1,5 @@
 package megatravel.com.pki.domain.DTO;
 
-import megatravel.com.pki.domain.Role;
-import megatravel.com.pki.domain.enums.UserType;
-
 import java.util.Set;
 
 public class RegisteringDTO {

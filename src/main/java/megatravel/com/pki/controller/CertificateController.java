@@ -1,27 +1,27 @@
 package megatravel.com.pki.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import megatravel.com.pki.converter.CertificateConverter;
-import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.cert.Certificate;
 import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
 import megatravel.com.pki.domain.enums.CerType;
+import megatravel.com.pki.service.CertificateGeneratorService;
 import megatravel.com.pki.service.CertificateService;
 import megatravel.com.pki.service.TransportService;
 import megatravel.com.pki.util.CerAndKey;
+import megatravel.com.pki.util.ValidationException;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import javax.security.auth.x500.X500Principal;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cer")
-public class CertificateController {
+public class CertificateController extends ValidationController {
 
 //    @Bean
 //    public RestTemplate restTemplate(RestTemplateBuilder builder) {
@@ -58,20 +58,23 @@ public class CertificateController {
     private CertificateService certificateService;
 
     @Autowired
+    private CertificateGeneratorService generatorService;
+
+    @Autowired
     private TransportService transportService;
 
 
     @GetMapping
-    @PreAuthorize("hasAuthority('GENCERT')")
+//    @PreAuthorize("hasAuthority('GENCERT')")
     public ResponseEntity<List<CertificateDTO>> getAll() {
         logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
-        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.getAll(),
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAll(),
                 CertificateDTO::new), HttpStatus.OK);
     }
 
     @GetMapping("/findAll")
     public ResponseEntity<List<CertificateDTO>> findAll() {
-        logger.info("Requesting all available servers at time {}.", Calendar.getInstance().getTime());
+        logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
         List<CertificateDTO> dtoList = new ArrayList<>();
         List<Certificate> certificateList = certificateService.findAll();
         for (Certificate c : certificateList) {
@@ -96,25 +99,28 @@ public class CertificateController {
      */
     @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     //@PreAuthorize("hasAuthority('SECADMIN')")
-    public ResponseEntity<String> generate(@RequestBody CertificateRequestDTO request) {
-        logger.info("Generating certificate at time {}.", Calendar.getInstance().getTime());
-        certificateService.setServer(request.getServer());
-        CerAndKey[] chain;
-        if (request.getType() == CerType.ROOT) {
-            certificateService.createRootCertificate(new X500Principal(request.getX500Name()));
-            return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
-        } else if (request.getType() == CerType.INTERMEDIATE) {
-            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), request.getType());
-            if (request.getDestination() != null && !request.getDestination().equals("")) {
-                transportService.sendCertificate(chain, request.getDestination(), false);
-            }
-        } else {
-            chain = certificateService.createSignedCertificate(new X500Principal(request.getX500Name()),
-                    request.getIssuer().getSerialNumber(), request.getType());
-            transportService.sendCertificate(chain, "users", true);
-        }
-
+    public ResponseEntity<String> save(@RequestBody String request) throws IOException, ValidationException {
+//        logger.info("Generating certificate at time {}.", Calendar.getInstance().getTime());
+//        certificateService.setServer(request.getServer());
+//        CerAndKey[] chain;
+//        if (request.getType() == CerType.ROOT) {
+//            certificateService.createRootCertificate(new X500Principal(request.getSubjectDN()));
+//            return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
+//        } else if (request.getType() == CerType.INTERMEDIATE) {
+//            chain = certificateService.createSignedCertificate(new X500Principal(request.getSubjectDN()),
+//                    request.getIssuerSN().getSerialNumber(), request.getType());
+//            if (request.getDestination() != null && !request.getDestination().equals("")) {
+//                transportService.sendCertificate(chain, request.getDestination(), false);
+//            }
+//        } else {
+//            chain = certificateService.createSignedCertificate(new X500Principal(request.getSubjectDN()),
+//                    request.getIssuerSN().getSerialNumber(), request.getType());
+//            transportService.sendCertificate(chain, "users", true);
+//        }
+        CertificateRequestDTO temp = new ObjectMapper().readValue(request, CertificateRequestDTO.class);
+        X500Name name = CertificateConverter.toX500Name(temp.getSubjectDN(), temp.getType());
+        System.out.println(name.toString());
+        generatorService.save(name, temp.getIssuerSN(), temp.getType());
         return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
     }
 

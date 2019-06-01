@@ -1,8 +1,7 @@
 package megatravel.com.pki.repository;
 
-import megatravel.com.pki.domain.User;
+import megatravel.com.pki.domain.rbac.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository

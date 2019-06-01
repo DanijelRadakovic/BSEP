@@ -1,4 +1,4 @@
-package megatravel.com.pki.domain;
+package megatravel.com.pki.domain.rbac;
 
 import javax.persistence.*;
 import java.io.Serializable;

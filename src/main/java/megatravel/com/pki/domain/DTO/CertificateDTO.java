@@ -1,19 +1,11 @@
 package megatravel.com.pki.domain.DTO;
 
-import megatravel.com.pki.domain.Certificate;
+import megatravel.com.pki.domain.cert.Certificate;
 
-import java.io.Serializable;
-
-public class CertificateDTO implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
+public class CertificateDTO {
     private Long id;
-
     private String serialNumber;
-
     private String distinguishedName;
-
     private boolean active;
 
     public CertificateDTO() {
@@ -31,10 +23,6 @@ public class CertificateDTO implements Serializable {
         this.serialNumber = certificate.getSerialNumber();
         this.distinguishedName = certificate.getDistinguishedName();
         this.active = certificate.isActive();
-    }
-
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
     }
 
     public Long getId() {
