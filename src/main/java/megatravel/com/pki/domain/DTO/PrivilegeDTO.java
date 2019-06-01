@@ -6,7 +6,8 @@ public class PrivilegeDTO {
 
     private String name;
 
-    public PrivilegeDTO(){}
+    public PrivilegeDTO() {
+    }
 
     public PrivilegeDTO(Long id, String name) {
         this.id = id;

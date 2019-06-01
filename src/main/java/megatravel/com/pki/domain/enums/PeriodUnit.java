@@ -7,7 +7,7 @@ public enum PeriodUnit {
 
     private final String name;
 
-    private PeriodUnit(String s) {
+    PeriodUnit(String s) {
         name = s;
     }
 

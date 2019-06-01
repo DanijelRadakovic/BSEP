@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class UserConverter extends AbstractConverter {
 
-    public static User toRegisteringEntity(RegisteringDTO dto){
+    public static User toRegisteringEntity(RegisteringDTO dto) {
         User user = new User();
         user.setUsername(dto.getUsername());
         byte[] salt = generateSalt();
@@ -25,16 +25,16 @@ public class UserConverter extends AbstractConverter {
         return user;
     }
 
-    public static UserDTO fromRegisteringEntity(User entity){
+    public static UserDTO fromRegisteringEntity(User entity) {
         UserDTO dto = new UserDTO();
         dto.setUsername(entity.getUsername());
         Set<RoleDTO> roles = new HashSet<>();
-        for(Role r : entity.getRoles()){
+        for (Role r : entity.getRoles()) {
             RoleDTO role = new RoleDTO();
             role.setId(r.getId());
             role.setName(r.getName());
             Set<PrivilegeDTO> privileges = new HashSet<>();
-            for(Privilege p : r.getPrivileges()){
+            for (Privilege p : r.getPrivileges()) {
                 PrivilegeDTO privilege = new PrivilegeDTO();
                 privilege.setId(p.getId());
                 privilege.setName(p.getName());
@@ -51,7 +51,7 @@ public class UserConverter extends AbstractConverter {
     /**
      * generating salt for storing in database
      */
-    private static byte[] generateSalt(){
+    private static byte[] generateSalt() {
         Random random = new SecureRandom(ByteBuffer.allocate(4)
                 .putInt(LocalDateTime.now().getSecond()).array());
         byte[] salt = new byte[64];
@@ -61,11 +61,12 @@ public class UserConverter extends AbstractConverter {
 
     /**
      * Hashing password
+     *
      * @param password - inserted password
-     * @param salt - hehe :D
+     * @param salt     - hehe :D
      * @return hashed password
      */
-    private static String hashPassword(String password, byte[] salt){
+    private static String hashPassword(String password, byte[] salt) {
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 10000, 255);
         Arrays.fill(password.toCharArray(), Character.MIN_VALUE);
         return null;

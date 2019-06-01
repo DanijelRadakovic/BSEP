@@ -19,10 +19,10 @@ public class Role implements Serializable {
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
-    @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinTable(name = "role_privilege",
             joinColumns = {@JoinColumn(name = "role_id")},
-            inverseJoinColumns = { @JoinColumn(name = "privilege_id")})
+            inverseJoinColumns = {@JoinColumn(name = "privilege_id")})
     private Set<Privilege> privileges;
 
 

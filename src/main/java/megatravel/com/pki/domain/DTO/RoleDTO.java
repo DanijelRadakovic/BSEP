@@ -10,7 +10,8 @@ public class RoleDTO {
 
     private Set<PrivilegeDTO> privileges;
 
-    public RoleDTO(){}
+    public RoleDTO() {
+    }
 
     public RoleDTO(Long id, String name, Set<PrivilegeDTO> privileges) {
         this.name = name;

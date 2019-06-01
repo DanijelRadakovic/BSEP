@@ -19,22 +19,22 @@ public class CertificateConverter extends AbstractConverter {
 
     private static final Map<String, ASN1ObjectIdentifier> x500NameMapper =
             new HashMap<String, ASN1ObjectIdentifier>() {{
-        put("commonName", BCStyle.CN);
-        put("surname", BCStyle.SURNAME);
-        put("givenName", BCStyle.GIVENNAME);
-        put("gender", BCStyle.GENDER);
-        put("country", BCStyle.C);
-        put("email", BCStyle.E);
-        put("organization", BCStyle.O);
-        put("organizationUnit", BCStyle.OU);
-        put("dateOfBirth", BCStyle.DATE_OF_BIRTH);
-        put("placeOfBirth", BCStyle.PLACE_OF_BIRTH);
-        put("street", BCStyle.STREET);
-        put("localityName", BCStyle.L);
-        put("postalCode", BCStyle.POSTAL_CODE);
-        put("countryOfCitizenship", BCStyle.COUNTRY_OF_CITIZENSHIP);
-        put("countryOfResidence", BCStyle.COUNTRY_OF_RESIDENCE);
-    }};
+                put("commonName", BCStyle.CN);
+                put("surname", BCStyle.SURNAME);
+                put("givenName", BCStyle.GIVENNAME);
+                put("gender", BCStyle.GENDER);
+                put("country", BCStyle.C);
+                put("email", BCStyle.E);
+                put("organization", BCStyle.O);
+                put("organizationUnit", BCStyle.OU);
+                put("dateOfBirth", BCStyle.DATE_OF_BIRTH);
+                put("placeOfBirth", BCStyle.PLACE_OF_BIRTH);
+                put("street", BCStyle.STREET);
+                put("localityName", BCStyle.L);
+                put("postalCode", BCStyle.POSTAL_CODE);
+                put("countryOfCitizenship", BCStyle.COUNTRY_OF_CITIZENSHIP);
+                put("countryOfResidence", BCStyle.COUNTRY_OF_RESIDENCE);
+            }};
 
     public static List<CertificateDTO> fromMapToDTO(Map<String, String> map) {
         List<CertificateDTO> certificates = new ArrayList<>();

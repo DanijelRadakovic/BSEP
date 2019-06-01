@@ -2,14 +2,12 @@ package megatravel.com.pki.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import megatravel.com.pki.converter.CertificateConverter;
-import megatravel.com.pki.domain.cert.Certificate;
 import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
-import megatravel.com.pki.domain.enums.CerType;
+import megatravel.com.pki.domain.cert.Certificate;
 import megatravel.com.pki.service.CertificateGeneratorService;
 import megatravel.com.pki.service.CertificateService;
 import megatravel.com.pki.service.TransportService;
-import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.ValidationException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;

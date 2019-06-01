@@ -4,8 +4,6 @@ import megatravel.com.pki.repository.CertificateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
@@ -23,7 +21,7 @@ public class VerificationService {
         return today.after(startDate) && today.before(endDate);
     }
 
-    private boolean verifyCertificate(X509Certificate cert){
+    private boolean verifyCertificate(X509Certificate cert) {
         boolean isActive = databaseRepository.findBySerialNumber(cert.getSerialNumber().longValue()).get(0).isActive();
 
         boolean isValidDate = checkDate(cert);
