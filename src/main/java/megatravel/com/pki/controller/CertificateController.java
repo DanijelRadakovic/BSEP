@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import megatravel.com.pki.converter.CertificateConverter;
 import megatravel.com.pki.domain.DTO.CertificateDTO;
 import megatravel.com.pki.domain.DTO.CertificateRequestDTO;
-import megatravel.com.pki.domain.cert.Certificate;
-import megatravel.com.pki.service.CertificateGeneratorService;
 import megatravel.com.pki.service.CertificateService;
-import megatravel.com.pki.service.TransportService;
 import megatravel.com.pki.util.ValidationException;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.slf4j.Logger;
@@ -19,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 
@@ -28,64 +23,86 @@ import java.util.List;
 @RequestMapping("/api/cer")
 public class CertificateController extends ValidationController {
 
-//    @Bean
-//    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-//        // Do any additional configuration here
-//        return builder.build();
-//    }
-
-//    @Autowired
-//    private RestTemplate restTemplate;
-//
-//    @GetMapping("/test")
-//    ResponseEntity<String> someRandomFunction() {
-//        restTemplate.getForObject("https://localhost:8081/api/cer", String.class);
-//        return new ResponseEntity<>("Successfully established connection with server localhost:8081!", HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/test2")
-//    ResponseEntity<String> someRandomFunction2() {
-//        restTemplate.getForObject("https://localhost:8082/api/cer", String.class);
-//        return new ResponseEntity<>("Successfully established connection with server localhost:8082!", HttpStatus.OK);
-//    }
-
     private static final Logger logger = LoggerFactory.getLogger(CertificateController.class);
 
     @Autowired
     private CertificateService certificateService;
 
     @Autowired
-    private CertificateGeneratorService generatorService;
+    private CertificateService generatorService;
 
-    @Autowired
-    private TransportService transportService;
-
-
+    /**
+     * GET /api/cer
+     *
+     * @return all available certificates
+     */
     @GetMapping
 //    @PreAuthorize("hasAuthority('GENCERT')")
     public ResponseEntity<List<CertificateDTO>> getAll() {
-        logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
+        logger.info("action=getAllCertificates status=success");
         return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAll(),
                 CertificateDTO::new), HttpStatus.OK);
     }
 
-    @GetMapping("/findAll")
-    public ResponseEntity<List<CertificateDTO>> findAll() {
-        logger.info("Requesting all available certificates at time {}.", Calendar.getInstance().getTime());
-        List<CertificateDTO> dtoList = new ArrayList<>();
-        List<Certificate> certificateList = certificateService.findAll();
-        for (Certificate c : certificateList) {
-            dtoList.add(new CertificateDTO(c));
-        }
-        return new ResponseEntity<>(dtoList, HttpStatus.OK);
+    /**
+     * GET /api/cer/active
+     *
+     * @return all available active certificates
+     */
+    @GetMapping("/active")
+//    @PreAuthorize("hasAuthority('GENCERT')")
+    public ResponseEntity<List<CertificateDTO>> getAllActive() {
+        logger.info("action=getAllActiveCertificates status=success");
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAllActive(),
+                CertificateDTO::new), HttpStatus.OK);
+    }
 
-//        CerAndKey[] ck = certificateRepository.load("keys", "zgadija",
-//                "327109625", "root");
-//        for (CerAndKey c : cks) {
-//            logger.info(c.getCertificate().toString());
-//        }
+    /**
+     * GET /api/cer/ca
+     *
+     * @return all available certificate authorities
+     */
+    @GetMapping("/ca")
+    public ResponseEntity<List<CertificateDTO>> getAllCA() {
+        logger.info("action=getAllCA status=success");
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAllCA(),
+                CertificateDTO::new), HttpStatus.OK);
+    }
 
+    /**
+     * GET /api/cer/ca/active
+     *
+     * @return all available active certificate authorities
+     */
+    @GetMapping("/ca/active")
+    public ResponseEntity<List<CertificateDTO>> getAllActiveCA() {
+        logger.info("action=getAllActiveCA status=success");
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAllActiveCA(),
+                CertificateDTO::new), HttpStatus.OK);
+    }
 
+    /**
+     * GET /api/cer/client
+     *
+     * @return all available client certificates
+     */
+    @GetMapping("/client")
+    public ResponseEntity<List<CertificateDTO>> getAllClients() {
+        logger.info("action=getAllClients status=success");
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAllClients(),
+                CertificateDTO::new), HttpStatus.OK);
+    }
+
+    /**
+     * GET /api/cer/client/active
+     *
+     * @return all available active client certificates
+     */
+    @GetMapping("/client/active")
+    public ResponseEntity<List<CertificateDTO>> getAllActiveClients() {
+        logger.info("action=getAllClients status=success");
+        return new ResponseEntity<>(CertificateConverter.fromEntityList(certificateService.findAllActiveClients(),
+                CertificateDTO::new), HttpStatus.OK);
     }
 
     /**
@@ -97,40 +114,26 @@ public class CertificateController extends ValidationController {
     @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     //@PreAuthorize("hasAuthority('SECADMIN')")
     public ResponseEntity<String> save(@RequestBody String request) throws IOException, ValidationException {
-//        logger.info("Generating certificate at time {}.", Calendar.getInstance().getTime());
-//        certificateService.setServer(request.getServer());
-//        CerAndKey[] chain;
-//        if (request.getType() == CerType.ROOT) {
-//            certificateService.createRootCertificate(new X500Principal(request.getSubjectDN()));
-//            return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
-//        } else if (request.getType() == CerType.INTERMEDIATE) {
-//            chain = certificateService.createSignedCertificate(new X500Principal(request.getSubjectDN()),
-//                    request.getIssuerSN().getSerialNumber(), request.getType());
-//            if (request.getDestination() != null && !request.getDestination().equals("")) {
-//                transportService.sendCertificate(chain, request.getDestination(), false);
-//            }
-//        } else {
-//            chain = certificateService.createSignedCertificate(new X500Principal(request.getSubjectDN()),
-//                    request.getIssuerSN().getSerialNumber(), request.getType());
-//            transportService.sendCertificate(chain, "users", true);
-//        }
-        CertificateRequestDTO temp = new ObjectMapper().readValue(request, CertificateRequestDTO.class);
-        X500Name name = CertificateConverter.toX500Name(temp.getSubjectDN(), temp.getType());
-        System.out.println(name.toString());
-        generatorService.save(name, temp.getIssuerSN(), temp.getType());
+        CertificateRequestDTO cer = new ObjectMapper().readValue(request, CertificateRequestDTO.class);
+        X500Name name = CertificateConverter.toX500Name(cer.getSubjectDN(), cer.getType());
+        generatorService.save(name, cer.getIssuerSN(), cer.getType());
+        logger.info("action=generateCert type={} dn={} status=success", cer.getType(), name);
         return new ResponseEntity<>("Certificate successfully created!", HttpStatus.OK);
     }
 
     /**
-     * DELETE /api/cer/remove/{id}
+     * DELETE /api/cer/{id}
      *
      * @param id of certificate that needs to be deleted
      * @return message about action results
      */
-    @DeleteMapping(value = "/remove/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> delete(@PathVariable String id) {
-        logger.info("Deleting certificate at time {}.", Calendar.getInstance().getTime());
         certificateService.remove(Long.parseLong(id));
+        logger.info("action=removeCert certId={} status=success", id);
         return new ResponseEntity<>("Certificate successfully deleted!", HttpStatus.OK);
     }
 }
+
+//TODO izmeniti da se koriste p12 storovi za bazu umesto jks
+//TODO popravi bug u comboboxu u truststorage

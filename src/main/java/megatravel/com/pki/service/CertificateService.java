@@ -1,122 +1,194 @@
 package megatravel.com.pki.service;
 
+import megatravel.com.pki.config.AppConfig;
 import megatravel.com.pki.domain.cert.Certificate;
+import megatravel.com.pki.domain.cert.IssuerData;
+import megatravel.com.pki.domain.cert.SubjectData;
 import megatravel.com.pki.domain.enums.CerType;
+import megatravel.com.pki.domain.enums.PeriodUnit;
 import megatravel.com.pki.repository.CertificateRepository;
 import megatravel.com.pki.repository.CertificateStorage;
-import megatravel.com.pki.util.CerAndKey;
 import megatravel.com.pki.util.GeneralException;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.cert.CertIOException;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import sun.security.tools.keytool.CertAndKeyGen;
-import sun.security.x509.*;
 
-import javax.security.auth.x500.X500Principal;
-import java.io.IOException;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
 
 @Service
 public class CertificateService {
 
     @Autowired
-    private CertificateStorage certificateStorage;
+    private AppConfig config;
+
+    @Autowired
+    private CertificateStorage storage;
 
     @Autowired
     private CertificateRepository certificateRepository;
-
-    private String server;
 
     public List<Certificate> findAll() {
         return certificateRepository.findAll();
     }
 
-    public void createRootCertificate(X500Principal root) {
-        CertAndKeyGen gen = generateKeyPair();
-        CertificateExtensions exts = new CertificateExtensions();
-        try {
-            exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(true, -1));
-            X509Certificate certificate = gen.getSelfCertificate(X500Name.asX500Name(root),
-                    new Date(), (long) 365 * 24 * 3600, exts);
-            CerAndKey ck = new CerAndKey(certificate, gen.getPrivateKey());
-            certificateStorage.store(new CerAndKey[]{ck}, server, CerType.ROOT, "keys", "zgadija");
-            certificateRepository.save(new Certificate(null, ck.getCertificate().getSerialNumber().toString(),
-                    ck.getCertificate().getSubjectDN().getName(), true));
-        } catch (IOException | CertificateException | InvalidKeyException | SignatureException
-                | NoSuchAlgorithmException | NoSuchProviderException e) {
-            throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public List<Certificate> findAllCA() {
+        return certificateRepository.findAllCA();
     }
 
-    public CerAndKey[] createSignedCertificate(X500Principal subject, String issuer, CerType type) {
-        CerAndKey[] chain = certificateStorage.load("keys", "zgadija", issuer, server,
-                CerType.INTERMEDIATE);
-        Principal issuerData = chain[0].getCertificate().getSubjectDN();
-        String issuerSigAlg = chain[0].getCertificate().getSigAlgName();
-
-        CertAndKeyGen sub = generateKeyPair();
-        try {
-            X509Certificate certificate = sub.getSelfCertificate(X500Name.asX500Name(subject),
-                    (long) 365 * 24 * 3600);
-            X509CertInfo info = new X509CertInfo(certificate.getTBSCertificate());
-            info.set(X509CertInfo.ISSUER, issuerData);
-
-            CertificateExtensions exts = new CertificateExtensions();
-            if (type == CerType.USER) {
-                exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(false, -1));
-            } else {
-                exts.set(BasicConstraintsExtension.NAME, new BasicConstraintsExtension(true, -1));
-            }
-
-            info.set(X509CertInfo.EXTENSIONS, exts);
-            X509CertImpl outCert = new X509CertImpl(info);
-            outCert.sign(chain[0].getPrivateKey(), issuerSigAlg);
-
-            chain[0].setPrivateKey(null); // do not store privet key of issuer
-            CerAndKey[] expendedChain = new CerAndKey[chain.length + 1];
-            expendedChain[0] = new CerAndKey(outCert, sub.getPrivateKey());
-            System.arraycopy(chain, 0, expendedChain, 1, chain.length);
-            certificateStorage.store(expendedChain, server, type, "keys", "zgadija");
-            certificateRepository.save(new Certificate(null, expendedChain[0].getCertificate().
-                    getSerialNumber().toString(), expendedChain[0].getCertificate()
-                    .getSubjectDN().getName(), true));
-            return expendedChain;
-        } catch (CertificateException | InvalidKeyException | SignatureException |
-                NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
-            throw new GeneralException("Error occurred while generating certificate!", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (DataIntegrityViolationException e) {
-            throw new GeneralException("Serial number is not unique!", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
+    public List<Certificate> findAllActive() {
+        return certificateRepository.findAllActive();
     }
 
-
-    private CertAndKeyGen generateKeyPair() {
-        try {
-            CertAndKeyGen keyGen = new CertAndKeyGen("RSA", "SHA256WithRSA", null);
-            keyGen.generate(4096);
-            keyGen.setRandom(SecureRandom.getInstance("SHA1PRNG", "SUN"));
-            return keyGen;
-        } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException e) {
-            throw new GeneralException("Invalid key generator configuration", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public List<Certificate> findAllActiveCA() {
+        return certificateRepository.findAllActiveCA();
     }
 
-    public void setServer(String server) {
-        this.server = server;
+    public List<Certificate> findAllClients() {
+        return certificateRepository.findAllClients();
+    }
+
+    public List<Certificate> findAllActiveClients() {
+        return certificateRepository.findAllActiveClients();
     }
 
     public void remove(Long id) {
-        Optional<Certificate> opt = certificateRepository.findById(id);
-        Certificate c = opt.get();
-        c.setActive(false);
-        certificateRepository.save(c);
+        Certificate cert = certificateRepository.findById(id).orElseThrow(() ->
+                new GeneralException("Certificate with id: " + id + "!", HttpStatus.BAD_REQUEST));
+        cert.setActive(false);
+        certificateRepository.save(cert);
+    }
+
+    public void save(X500Name subjectDN, String issuerSN, CerType type) {
+        KeyPair keyPair;
+        SubjectData subject;
+        IssuerData issuer;
+        X509Certificate certificate;
+
+        if (issuerSN == null || type == CerType.ROOT) {
+            keyPair = generateKeyPair(true);
+            subject = generateSubjectData(keyPair.getPublic(), subjectDN, true);
+            issuer = new IssuerData(keyPair.getPrivate(), subjectDN, subject.getPublicKey(), subject.getSerialNumber());
+            certificate = generateCertificate(subject, issuer, true);
+        } else if (type == CerType.INTERMEDIATE) {
+            keyPair = generateKeyPair(true);
+            subject = generateSubjectData(keyPair.getPublic(), subjectDN, true);
+            issuer = storage.findCAbySerialNumber(issuerSN);
+            certificate = generateCertificate(subject, issuer, true);
+            //TODO add to public repo
+        }
+        else {
+            keyPair = generateKeyPair(false);
+            issuer = storage.findCAbySerialNumber(issuerSN);
+            subject = generateSubjectData(keyPair.getPublic(), subjectDN, false);
+            certificate = generateCertificate(subject, issuer, false);
+        }
+
+        try {
+            certificateRepository.save(new Certificate(null, certificate.getSerialNumber().toString(),
+                    certificate.getSubjectDN().toString(), type, true));
+            storage.store(new X509Certificate[]{certificate}, keyPair.getPrivate());
+            if (type == CerType.CLIENT) {
+                storage.createTrustStorage(certificate);
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new GeneralException("Subject name or serial number is not unique!", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private X509Certificate generateCertificate(SubjectData subjectData, IssuerData issuerData, boolean isCA) {
+        try {
+            ContentSigner contentSigner = new JcaContentSignerBuilder(
+                    config.getSignatureAlgorithm())
+                    .setProvider(config.getProvider()).build(issuerData.getPrivateKey());
+
+            X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(issuerData.getX500name(),
+                    subjectData.getSerialNumber(),
+                    subjectData.getStartDate(),
+                    subjectData.getEndDate(),
+                    subjectData.getX500name(),
+                    subjectData.getPublicKey());
+
+            BasicConstraints basicConstraints = new BasicConstraints(isCA);
+            certGen.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, basicConstraints);
+
+            JcaX509ExtensionUtils extensionUtils = new JcaX509ExtensionUtils();
+
+            AuthorityKeyIdentifier authorityKeyIdentifier = extensionUtils
+                    .createAuthorityKeyIdentifier(issuerData.getPublicKey());
+            certGen.addExtension(new ASN1ObjectIdentifier("2.5.29.35"), false, authorityKeyIdentifier);
+
+            SubjectKeyIdentifier subjectKeyIdentifier = extensionUtils
+                    .createSubjectKeyIdentifier(subjectData.getPublicKey());
+            certGen.addExtension(new ASN1ObjectIdentifier("2.5.29.14"), false, subjectKeyIdentifier);
+
+            return new JcaX509CertificateConverter().setProvider(config.getProvider())
+                    .getCertificate(certGen.build(contentSigner));
+        } catch (IllegalArgumentException | IllegalStateException | OperatorCreationException |
+                CertificateException | CertIOException | NoSuchAlgorithmException e) {
+            throw new GeneralException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private KeyPair generateKeyPair(boolean isCA) {
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance(config.getKeyAlgorithm());
+            SecureRandom random = SecureRandom.getInstance(config.getSeedAlgorithm(), config.getSeedProvider());
+            if (isCA) keyGen.initialize(config.getCaKeySize(), random);
+            else keyGen.initialize(config.getClientKeysize(), random);
+            return keyGen.generateKeyPair();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            throw new GeneralException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private SubjectData generateSubjectData(PublicKey publicKey, X500Name subjectDN, boolean isCA) {
+        long now = System.currentTimeMillis();
+        Date startDate = new Date(now);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        Date endDate = getValidityPeriod(calendar, isCA);
+        return new SubjectData(publicKey, subjectDN, new BigInteger(Long.toString(now)), startDate, endDate);
+    }
+
+    private Date getValidityPeriod(Calendar now, boolean isCA) {
+        if (config.getPeriodUnit() == PeriodUnit.DAY && isCA) {
+            now.add(Calendar.DATE, config.getCaPeriod());
+            return now.getTime();
+        } else if (config.getPeriodUnit() == PeriodUnit.DAY && !isCA) {
+            now.add(Calendar.DATE, config.getClientPeriod());
+            return now.getTime();
+        } else if (config.getPeriodUnit() == PeriodUnit.MONTH && isCA) {
+            now.add(Calendar.MONTH, config.getCaPeriod());
+            return now.getTime();
+        } else if (config.getPeriodUnit() == PeriodUnit.MONTH && !isCA) {
+            now.add(Calendar.MONTH, config.getClientPeriod());
+            return now.getTime();
+        } else if (config.getPeriodUnit() == PeriodUnit.YEAR && isCA) {
+            now.add(Calendar.YEAR, config.getCaPeriod());
+            return now.getTime();
+        } else {
+            now.add(Calendar.YEAR, config.getClientPeriod());
+            return now.getTime();
+        }
     }
 }

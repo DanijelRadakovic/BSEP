@@ -1,5 +1,7 @@
 package megatravel.com.pki.domain.cert;
 
+import megatravel.com.pki.domain.enums.CerType;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -19,15 +21,20 @@ public class Certificate implements Serializable {
     private String distinguishedName;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    private CerType type;
+
+    @Column(nullable = false)
     private boolean active;
 
     public Certificate() {
     }
 
-    public Certificate(Long id, String serialNumber, String distinguishedName, boolean active) {
+    public Certificate(Long id, String serialNumber, String distinguishedName, CerType type, boolean active) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.distinguishedName = distinguishedName;
+        this.type = type;
         this.active = active;
     }
 
@@ -65,5 +72,13 @@ public class Certificate implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public CerType getType() {
+        return type;
+    }
+
+    public void setType(CerType type) {
+        this.type = type;
     }
 }

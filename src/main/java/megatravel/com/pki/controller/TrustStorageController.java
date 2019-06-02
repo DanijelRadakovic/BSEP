@@ -32,10 +32,10 @@ public class TrustStorageController {
      * @return server with requested id
      */
     @GetMapping("{id}")
-    public ResponseEntity<List<CertificateDTO>> findTrustStorage(@PathVariable String id) {
-        logger.info("Requesting trust storage with serial number {} at time {}.", id, Calendar.getInstance().getTime());
-        return new ResponseEntity<>(CertificateConverter.fromMapToDTO(trustStorageService.getTrustStorage(id)),
-                HttpStatus.OK);
+    public ResponseEntity<List<CertificateDTO>> getCertsFromTruststorage(@PathVariable String id) {
+        logger.info("action=getTruststore certId={} status=success", id);
+        return new ResponseEntity<>(CertificateConverter.fromListX509ToDTO(trustStorageService.
+                getCertsFromTrustStorage(id)), HttpStatus.OK);
     }
 
     /**
@@ -46,7 +46,7 @@ public class TrustStorageController {
      */
     @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     //@PreAuthorize("hasAuthority('SECADMIN')")
-    public ResponseEntity<String> generate(@RequestBody TrustStorageDTO request) {
+    public ResponseEntity<String> save(@RequestBody TrustStorageDTO request) {
         logger.info("Updating certificate trust storage at time {}.", Calendar.getInstance().getTime());
         trustStorageService.updateTrustStorage(request.getTarget(), request.getSerialNumbers());
         return new ResponseEntity<>("Trust storage successfully updated!", HttpStatus.OK);

@@ -13,7 +13,9 @@ import org.springframework.http.HttpStatus;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CertificateConverter extends AbstractConverter {
 
@@ -27,7 +29,6 @@ public class CertificateConverter extends AbstractConverter {
                 put("email", BCStyle.E);
                 put("organization", BCStyle.O);
                 put("organizationUnit", BCStyle.OU);
-                put("dateOfBirth", BCStyle.DATE_OF_BIRTH);
                 put("placeOfBirth", BCStyle.PLACE_OF_BIRTH);
                 put("street", BCStyle.STREET);
                 put("localityName", BCStyle.L);
@@ -36,16 +37,9 @@ public class CertificateConverter extends AbstractConverter {
                 put("countryOfResidence", BCStyle.COUNTRY_OF_RESIDENCE);
             }};
 
-    public static List<CertificateDTO> fromMapToDTO(Map<String, String> map) {
-        List<CertificateDTO> certificates = new ArrayList<>();
-        Iterator it = map.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            certificates.add(new CertificateDTO(0L, (String) pair.getKey(),
-                    (String) pair.getValue(), true));
-            it.remove(); // avoids a ConcurrentModificationException
-        }
-        return certificates;
+    public static List<CertificateDTO> fromListX509ToDTO(List<X509Certificate> certs) {
+         return certs.stream().map(cert -> new CertificateDTO(0L, cert.getSerialNumber().toString(),
+                cert.getSubjectDN().toString(), true)).collect(Collectors.toList());
     }
 
     public static X500Name toX500Name(SubjectDTO subject, CerType type) {
@@ -63,7 +57,7 @@ public class CertificateConverter extends AbstractConverter {
             }
         }
 
-        if (type == CerType.USER) {
+        if (type == CerType.CLIENT) {
             builder.addRDN(BCStyle.UID, System.currentTimeMillis() + "");
         }
         return builder.build();

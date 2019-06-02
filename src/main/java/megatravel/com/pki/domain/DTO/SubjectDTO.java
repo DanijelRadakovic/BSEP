@@ -9,7 +9,6 @@ public class SubjectDTO {
     private String email;
     private String organization;
     private String organizationUnit;
-    private String dateOfBirth;
     private String placeOfBirth;
     private String street;
     private String localityName;
@@ -34,7 +33,7 @@ public class SubjectDTO {
     }
 
     public SubjectDTO(String commonName, String surname, String givenName, String gender, String country, String email,
-                      String organization, String organizationUnit, String dateOfBirth, String placeOfBirth,
+                      String organization, String organizationUnit, String placeOfBirth,
                       String street, String localityName, String postalCode, String countryOfCitizenship,
                       String countryOfResidence) {
         this.commonName = commonName;
@@ -45,7 +44,6 @@ public class SubjectDTO {
         this.email = email;
         this.organization = organization;
         this.organizationUnit = organizationUnit;
-        this.dateOfBirth = dateOfBirth;
         this.placeOfBirth = placeOfBirth;
         this.street = street;
         this.localityName = localityName;
@@ -116,14 +114,6 @@ public class SubjectDTO {
 
     public void setOrganizationUnit(String organizationUnit) {
         this.organizationUnit = organizationUnit;
-    }
-
-    public String getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(String dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
     }
 
     public String getPlaceOfBirth() {
