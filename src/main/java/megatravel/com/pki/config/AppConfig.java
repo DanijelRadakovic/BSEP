@@ -51,6 +51,9 @@ public class AppConfig {
     @Value("${pki.ca.period}")
     private String caPeriod;
 
+    @Value("${pki.ssh.username}")
+    private String sshUsername;
+
     public String getKeystore() {
         return keystore;
     }
@@ -169,5 +172,13 @@ public class AppConfig {
 
     public void setTruststorePassword(String truststorePassword) {
         this.truststorePassword = truststorePassword;
+    }
+
+    public String getSshUsername() {
+        return sshUsername;
+    }
+
+    public void setSshUsername(String sshUsername) {
+        this.sshUsername = sshUsername;
     }
 }

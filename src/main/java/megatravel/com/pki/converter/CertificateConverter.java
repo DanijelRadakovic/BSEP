@@ -1,7 +1,9 @@
 package megatravel.com.pki.converter;
 
 import megatravel.com.pki.domain.DTO.CertificateDTO;
+import megatravel.com.pki.domain.DTO.CertificateDistributionDTO;
 import megatravel.com.pki.domain.DTO.SubjectDTO;
+import megatravel.com.pki.domain.cert.CertificateDistribution;
 import megatravel.com.pki.domain.enums.CerType;
 import megatravel.com.pki.util.GeneralException;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -61,5 +63,11 @@ public class CertificateConverter extends AbstractConverter {
             builder.addRDN(BCStyle.UID, System.currentTimeMillis() + "");
         }
         return builder.build();
+    }
+
+    public static CertificateDistribution toEntity(CertificateDistributionDTO distribution) {
+        return new CertificateDistribution(distribution.getSerialNumber(), distribution.isPrivateKey(),
+                distribution.isKeystore(), distribution.isTruststore(), distribution.getHostname(),
+                distribution.getDestination());
     }
 }

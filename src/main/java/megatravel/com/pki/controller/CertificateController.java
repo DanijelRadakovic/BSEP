@@ -109,11 +109,12 @@ public class CertificateController extends ValidationController {
      * POST /api/cer
      *
      * @param request that needs to be processed
-     * @return added vehicle
+     * @return message about action results
      */
     @PostMapping(produces = MediaType.TEXT_PLAIN_VALUE)
     //@PreAuthorize("hasAuthority('SECADMIN')")
     public ResponseEntity<String> save(@RequestBody String request) throws IOException, ValidationException {
+        validateJSON(request, "certificate.json");
         CertificateRequestDTO cer = new ObjectMapper().readValue(request, CertificateRequestDTO.class);
         X500Name name = CertificateConverter.toX500Name(cer.getSubjectDN(), cer.getType());
         generatorService.save(name, cer.getIssuerSN(), cer.getType());
@@ -136,4 +137,3 @@ public class CertificateController extends ValidationController {
 }
 
 //TODO izmeniti da se koriste p12 storovi za bazu umesto jks
-//TODO popravi bug u comboboxu u truststorage

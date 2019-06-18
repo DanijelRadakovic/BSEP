@@ -30,7 +30,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -48,27 +51,27 @@ public class CertificateService {
     private CertificateRepository certificateRepository;
 
     public List<Certificate> findAll() {
-        return certificateRepository.findAll();
+        return validate(certificateRepository.findAll());
     }
 
     public List<Certificate> findAllCA() {
-        return certificateRepository.findAllCA();
+        return validate(certificateRepository.findAllCA());
     }
 
     public List<Certificate> findAllActive() {
-        return certificateRepository.findAllActive();
+        return validate(certificateRepository.findAllActive());
     }
 
     public List<Certificate> findAllActiveCA() {
-        return certificateRepository.findAllActiveCA();
+        return validate(certificateRepository.findAllActiveCA());
     }
 
     public List<Certificate> findAllClients() {
-        return certificateRepository.findAllClients();
+        return validate(certificateRepository.findAllClients());
     }
 
     public List<Certificate> findAllActiveClients() {
-        return certificateRepository.findAllActiveClients();
+        return validate(certificateRepository.findAllActiveClients());
     }
 
     public void remove(Long id) {
@@ -94,7 +97,6 @@ public class CertificateService {
             subject = generateSubjectData(keyPair.getPublic(), subjectDN, true);
             issuer = storage.findCAbySerialNumber(issuerSN);
             certificate = generateCertificate(subject, issuer, true);
-            //TODO add to public repo
         }
         else {
             keyPair = generateKeyPair(false);
@@ -190,5 +192,23 @@ public class CertificateService {
             now.add(Calendar.YEAR, config.getClientPeriod());
             return now.getTime();
         }
+    }
+
+    private List<Certificate> validate(List<Certificate> certs) {
+        List<Certificate> result = new ArrayList<>(certs.size());
+        List<Certificate> invalid = new ArrayList<>(certs.size());
+        java.security.cert.Certificate[] chain;
+        for (Certificate cert : certs) {
+            chain = storage.getCertificateChain(cert.getSerialNumber(), false).getChain();
+            try {
+                ((X509Certificate)chain[0]).checkValidity();
+                result.add(cert);
+            } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+                cert.setActive(false);
+                invalid.add(cert);
+            }
+        }
+        certificateRepository.saveAll(invalid);
+        return result;
     }
 }

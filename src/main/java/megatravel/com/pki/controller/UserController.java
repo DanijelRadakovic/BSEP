@@ -79,36 +79,6 @@ public class UserController {
         }
     }
 
-//    /**
-//     * Endpoint for logging in of all types of users
-//     * @param loginDTO - dto with required credentials
-//     * @return user if successfully logged in, or message if error happened
-//     */
-//    @PostMapping(value = "login", produces = "application/text")
-//
-//    public ResponseEntity<Object> login(@RequestBody LoginDTO loginDTO){
-//        try{
-//            logger.info("Logging in... " + Calendar.getInstance().getTime());
-//            User user = userService.logIn(loginDTO.getUsername(), loginDTO.getPassword());
-//            if (user == null){
-//                logger.warn("Unsuccessful log password for " + loginDTO.getUsername() + " at "
-//                        + Calendar.getInstance().getTime());
-//                return new ResponseEntity<>("Incorrect password!", HttpStatus.BAD_REQUEST);
-//            }
-//            logger.info("Successfully logged in, " + loginDTO.getUsername() + ". " + Calendar.getInstance().getTime());
-//            return new ResponseEntity<>("Successfully logged in", HttpStatus.OK);
-//        }catch(GeneralException e){
-//            logger.warn("Unsuccessful log username:" + loginDTO.getUsername() + " at "
-//                    + Calendar.getInstance().getTime());
-//            return new ResponseEntity<>(e.getMessage(), e.getHttpStatus());
-//        }catch(Exception e1){
-//            logger.error("Error while trying to log in happened, message: " + e1.getMessage() + ", time: "
-//                    + Calendar.getInstance().getTime());
-//            return new ResponseEntity<>(e1.getMessage(), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
-
     /**
      * POST /api/user/auth
      * Authenticates a user in the system.
